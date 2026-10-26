@@ -68,7 +68,27 @@ class TransferServiceIntegrationTest {
                 .isEqualByComparingTo("1100");
     }
 
-    // 2. 예외 플로우 - 수취인 계좌 없음
+    // 2. 예외 플로우 - 발신인 계좌 없음
+    @Test
+    @DisplayName("발신인 계좌가 없으면 예외가 발생한다")
+    void senderNotFound() {
+
+        // Given
+        // ID 999인 계좌가 DB에 존재하지 않는지 확인
+        assertThat(accountRepository.existsById(999L))
+                .isFalse();
+
+        // When & Then
+        assertThatThrownBy(() ->
+                transferService.transferMoney(
+                        999L, 2L, new BigDecimal("100")
+                )
+        )
+                .isInstanceOf(AccountNotFoundException.class)
+                .hasMessageContaining("Sender");
+    }
+
+    // 3. 예외 플로우 - 수취인 계좌 없음
     @Test
     @DisplayName("수취인 계좌가 없으면 잔액이 변경되지 않는다")
     void receiverNotFound() {
